@@ -1,13 +1,17 @@
 local arcomlib = {}
 
 local CLIENT_MODEM_SIDE = "back"
-local ARCOM_PROTOCAL = "arcom"
+local ARCOM_CMD_PROTOCAL = "arcom_cmd"
+local ARCOM_FEEDBACK_PROTOCAL = "arcom_feedback"
+local ARCOM_CLIENT_NAME = "ArcomClient"
 
 -- API layer
 -------------------------------------------
 function arcomlib.initClient()
 	arcomlib.instanceType = "Client"
+	arcomlib.instanceName = ARCOM_CLIENT_NAME
 	rednet.open(CLIENT_MODEM_SIDE)
+	rednet.host(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
 	print( "Arcom Client: Initialized." )
 end
 
@@ -17,7 +21,7 @@ function arcomlib.initServer( serverName, modemside )
 	arcomlib.instanceModemSide = modemside
 	arcomlib.instanceType = "Server"
 	rednet.open(modemside)
-	rednet.host(ARCOM_PROTOCAL, serverName)
+	rednet.host(ARCOM_CMD_PROTOCAL, serverName)
 
 	-- Init interrupt vector table
 	if arcomlib.interruptVectorTable == nil then
@@ -28,8 +32,10 @@ function arcomlib.initServer( serverName, modemside )
 	__enabled = false
 	arcomlib.interruptVectorTable["enable"] = function()
 		__enabled = true
+		arcomlib.sendFeedback("OK", "Enabled.")
 	end
 	arcomlib.interruptVectorTable["disable"] = function()
+		arcomlib.sendFeedback("OK", "Disabled.")
 		__enabled = false
 	end
 
@@ -57,14 +63,22 @@ end
 
 
 function arcomlib.startServer()
-	local ISRHost = 
-	function()
+	local ISRHost = function()
 		while true do
 			local cmd = {}
 			local senderID = -1
-			senderID, cmd, _ = rednet.receive(ARCOM_PROTOCAL)
-			print( "Arcom Server: recieved an request to ISR "..cmd.targetISR.." from "..senderID..".")
-			arcomlib.interruptVectorTable[cmd.targetISR](table.unpack(cmd.args))
+			senderID, cmd, _ = rednet.receive(ARCOM_CMD_PROTOCAL)
+			local isNameValid = false
+			for isrName, isrFunc in pairs( arcomlib.interruptVectorTable ) do
+				if cmd.targetISR == isrName then
+					isNameValid = true
+					print( "Arcom Server: recieved an request to ISR "..cmd.targetISR..".")
+					arcomlib.interruptVectorTable[cmd.targetISR](table.unpack(cmd.args))
+				end
+			end
+			if isNameValid == false then
+				arcomlib.sendFeedback("ERROR", "No such ISR!")
+			end
 		end
 	end
 	-- Use parallel API to start the ISR host 
@@ -73,7 +87,6 @@ function arcomlib.startServer()
 end
 
 
--- TODO: make this capable with feedbacks
 function arcomlib.fireCmd( msg )
 	local spiltedMsg = {}
 	-- Spilt cmd string into seprate words
@@ -89,19 +102,43 @@ function arcomlib.fireCmd( msg )
 	cmd.targetISR = spiltedMsg[2]
 	cmd.args = table.pack( table.unpack( spiltedMsg, 3, #spiltedMsg ) )
 	-- Lookup server ID
-	destID = rednet.lookup(ARCOM_PROTOCAL, cmd.dest)
+	destID = rednet.lookup(ARCOM_CMD_PROTOCAL, cmd.dest)
+	if destID == nil then
+		print( "[ERROR] Arcom DNS: no such server!" )
+		return
+	end
 	-- Send cmd
-	rednet.send(destID, cmd, ARCOM_PROTOCAL)
+	rednet.send(destID, cmd, ARCOM_CMD_PROTOCAL)
 end
 
 
 function arcomlib.sendFeedback( stat, msg )
-	-- TODO
+	local feedBack = {}
+	feedBack.stat = stat
+	feedBack.msg = msg
+	feedBack.sender = arcomlib.instanceName
+	clientID = rednet.lookup(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
+	rednet.send(clientID, feedBack, ARCOM_FEEDBACK_PROTOCAL)
+end
+
+
+function arcomlib.receiveFeedback()
+	local feedBack = {}
+	_, feedBack, _ = rednet.receive(ARCOM_FEEDBACK_PROTOCAL)
+	return feedBack
 end
 
 
 function arcomlib.clearup()
-	-- TODO
+	if arcomlib.instanceType == nil then
+		return
+	end
+
+	print( "Arcom: clearing up." )
+	arcomlib.instanceType = nil
+	arcomlib.instanceName = nil
+	arcomlib.instanceModemSide = nil
+	rednet.unhost(arcomlib.instanceName)
 end
 
 ------------------------------------
