@@ -5,8 +5,6 @@ local ARCOM_CMD_PROTOCAL = "arcom_cmd"
 local ARCOM_FEEDBACK_PROTOCAL = "arcom_feedback"
 local ARCOM_CLIENT_NAME = "ArcomClient"
 
--- API layer
--------------------------------------------
 function arcomlib.initClient()
 	arcomlib.instanceType = "Client"
 	arcomlib.instanceName = ARCOM_CLIENT_NAME
@@ -57,6 +55,15 @@ function arcomlib.regMainLoop( mainLoop )
 end
 
 
+function arcomlib.regSafetyWatchdog( sw )
+	arcomlib.safetyWatchdogFunction = function()
+		while true do
+			sw()
+		end
+	end
+end
+
+
 function arcomlib.regInterrupt( ISR, boundedCmd )
 	arcomlib.interruptVectorTable[boundedCmd] = ISR
 end
@@ -72,7 +79,11 @@ function arcomlib.startServer()
 			for isrName, isrFunc in pairs( arcomlib.interruptVectorTable ) do
 				if cmd.targetISR == isrName then
 					isNameValid = true
-					print( "Arcom Server: recieved an request to ISR "..cmd.targetISR..".")
+					if senderID == os.getComputerID() then
+						print( "Arcom Server: get an inner interrupt to ISR "..cmd.targetISR..".")					
+					else
+						print( "Arcom Server: recieved an request to ISR "..cmd.targetISR..".")
+					end
 					arcomlib.interruptVectorTable[cmd.targetISR](table.unpack(cmd.args))
 				end
 			end
@@ -83,7 +94,20 @@ function arcomlib.startServer()
 	end
 	-- Use parallel API to start the ISR host 
 	-- and the main loop at the same time.
-	parallel.waitForAny(arcomlib.mainLoopFunction, ISRHost)
+	if arcomlib.safetyWatchdogFunction ~= nil then
+		parallel.waitForAny(arcomlib.safetyWatchdogFunction, arcomlib.mainLoopFunction, ISRHost)
+	else
+		parallel.waitForAny(arcomlib.mainLoopFunction, ISRHost)
+	end
+end
+
+
+function arcomlib.innerInterrupt( targetISR, args )
+	cmd = {}
+	cmd.targetISR = targetISR
+	if args == nil then args = {} end
+	cmd.args = args
+	rednet.send(os.getComputerID(), cmd, ARCOM_CMD_PROTOCAL)
 end
 
 
