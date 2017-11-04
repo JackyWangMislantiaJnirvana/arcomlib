@@ -42,6 +42,11 @@ end
 
 
 function arcomlib.regMainLoop( mainLoop )
+	-- argument validity check
+	if (type(mainLoop) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(mainLoop))
+	end
+
 	arcomlib.mainLoopFunction = function()
 		while true do
 			if __enabled == true then
@@ -55,7 +60,22 @@ function arcomlib.regMainLoop( mainLoop )
 end
 
 
+function arcomlib.regInitFunction( initFunc )
+	-- argument validity check
+	if (type(initFunc) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(initFunc))
+	end
+
+	arcomlib.initFunction = initFunc
+end
+
+
 function arcomlib.regSafetyWatchdog( sw )
+	-- argument validity check
+	if (type(sw) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(sw))
+	end
+
 	arcomlib.safetyWatchdogFunction = function()
 		while true do
 			sw()
@@ -65,6 +85,11 @@ end
 
 
 function arcomlib.regInterrupt( ISR, boundedCmd )
+	-- argument validity check
+	if (type(ISR) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(ISR))
+	end
+
 	arcomlib.interruptVectorTable[boundedCmd] = ISR
 end
 
@@ -80,7 +105,7 @@ function arcomlib.startServer()
 				if cmd.targetISR == isrName then
 					isNameValid = true
 					if senderID == os.getComputerID() then
-						print( "Arcom Server: get an inner interrupt to ISR "..cmd.targetISR..".")					
+						print( "Arcom Server: get an inner interrupt to ISR "..cmd.targetISR..".")
 					else
 						print( "Arcom Server: recieved an request to ISR "..cmd.targetISR..".")
 					end
@@ -92,7 +117,10 @@ function arcomlib.startServer()
 			end
 		end
 	end
-	-- Use parallel API to start the ISR host 
+	-- call the init function
+	arcomlib.initFunction()
+
+	-- Use parallel API to start the ISR host
 	-- and the main loop at the same time.
 	if arcomlib.safetyWatchdogFunction ~= nil then
 		parallel.waitForAny(arcomlib.safetyWatchdogFunction, arcomlib.mainLoopFunction, ISRHost)
@@ -114,7 +142,7 @@ end
 function arcomlib.fireCmd( msg )
 	local spiltedMsg = {}
 	-- Spilt cmd string into seprate words
-	-- Using Lua regExpressions, 
+	-- Using Lua regExpressions,
 	-- in which "[%w%p]" means "any letter, number or marks"
 	for cur in string.gmatch( msg, "[%w%p]+" ) do
 		table.insert( spiltedMsg, cur )
