@@ -59,8 +59,10 @@ function arcomlib.startServer()
 			end
 		end
 	end
-	-- call the init function
-	arcomlib.initFunction()
+	-- Is there's any init function, call it.
+	if arcomlib.initFunction ~= nil then
+		arcomlib.initFunction()
+	end
 
 	-- Use parallel API to start the ISR host
 	-- and the main loop at the same time.
