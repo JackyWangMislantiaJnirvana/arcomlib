@@ -1,5 +1,2 @@
-arcom_server.lua
-Testers
 CCEnv
-testServer.lua
-sync.sh
+deploy.sh

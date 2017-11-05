@@ -2,7 +2,7 @@ local WAIT_FOR_FEEDBACK = 0.0001
 local FEEDBACK_FLUSH_PERIOD = 1
 
 print("ARC Communication Systems Client")
-local arcom = dofile( "arcomlib.lua" )
+local arcom = dofile( "/lib/arcomlib.lua" )
 arcom.initClient()
 
 local feedBackQueue = {}	-- If a lock is nessensarry?
