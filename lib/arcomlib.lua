@@ -11,6 +11,13 @@ local ARCOM_CLIENT_NAME = "ArcomClient"
 ------------------------------------------
 	-- Operates the server
 function arcomlib.initServer( serverName, modemside )
+	if type(serverName) ~= "string" then
+		error("Arcomlib: initServer: Bad serverName, string expected.")
+	end
+	if type(modemside) ~= "string" then
+		error("Arcomlib: initServer: Bad modemside, string expected.")
+	end
+
 	arcomlib.instanceName = serverName
 	arcomlib.instanceModemSide = modemside
 	arcomlib.instanceType = "Server"
@@ -37,7 +44,7 @@ function arcomlib.initServer( serverName, modemside )
 end
 
 function arcomlib.startServer()
-	local ISRHost = function()
+	local function ISRHost()
 		while true do
 			local cmd = {}
 			local senderID = -1
@@ -59,6 +66,7 @@ function arcomlib.startServer()
 			end
 		end
 	end
+
 	-- Is there's any init function, call it.
 	if arcomlib.initFunction ~= nil then
 		arcomlib.initFunction()
@@ -78,7 +86,7 @@ end
 function arcomlib.regMainLoop( mainLoop )
 	-- argument validity check
 	if (type(mainLoop) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(mainLoop))
+		error("Arcomlib: regMainLoop: function expected.")
 	end
 
 	arcomlib.mainLoopFunction = function()
@@ -95,8 +103,8 @@ end
 
 function arcomlib.regInitFunction( initFunc )
 	-- argument validity check
-	if (type(initFunc) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(initFunc))
+	if type(initFunc) ~= "function" then
+		error("Arcomlib: regInitFunction: function expected.")
 	end
 
 	arcomlib.initFunction = initFunc
@@ -104,8 +112,8 @@ end
 
 function arcomlib.regSafetyWatchdog( sw )
 	-- argument validity check
-	if (type(sw) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(sw))
+	if type(sw) ~= "function" then
+		error("Arcomlib: regSafetyWatchdog: function expected.")
 	end
 
 	arcomlib.safetyWatchdogFunction = function()
@@ -117,8 +125,8 @@ end
 
 function arcomlib.regInterrupt( ISR, boundedCmd )
 	-- argument validity check
-	if (type(ISR) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(ISR))
+	if type(ISR) ~= "function" then
+		error("Arcomlib: regInterrupt: function expected.")
 	end
 
 	arcomlib.interruptVectorTable[boundedCmd] = ISR
@@ -127,6 +135,10 @@ end
 ------------------------------------------------------------
 	-- Used by ISRs
 function arcomlib.innerInterrupt( targetISR, args )
+	if type(targetISR) ~= "string" then
+		error("Arcom Server: innerInterrupt: Bad targetISR, function expected, got "..type(targetISR))
+	end
+
 	cmd = {}
 	cmd.targetISR = targetISR
 	if args == nil then args = {} end
@@ -140,7 +152,11 @@ function arcomlib.sendFeedback( stat, msg )
 	feedBack.msg = msg
 	feedBack.sender = arcomlib.instanceName
 	clientID = rednet.lookup(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
-	rednet.send(clientID, feedBack, ARCOM_FEEDBACK_PROTOCAL)
+	if clientID == nil then
+		print("Arcom Server: Error: Client cannot be found.")
+	else
+		rednet.send(clientID, feedBack, ARCOM_FEEDBACK_PROTOCAL)
+	end
 end
 
 
