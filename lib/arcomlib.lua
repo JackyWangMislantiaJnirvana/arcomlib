@@ -1,19 +1,15 @@
 local arcomlib = {}
 
+-- Constants
 local CLIENT_MODEM_SIDE = "back"
 local ARCOM_CMD_PROTOCAL = "arcom_cmd"
 local ARCOM_FEEDBACK_PROTOCAL = "arcom_feedback"
 local ARCOM_CLIENT_NAME = "ArcomClient"
 
-function arcomlib.initClient()
-	arcomlib.instanceType = "Client"
-	arcomlib.instanceName = ARCOM_CLIENT_NAME
-	rednet.open(CLIENT_MODEM_SIDE)
-	rednet.host(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
-	print( "Arcom Client: Initialized." )
-end
-
-
+------------------------------------------
+-- Server side interface
+------------------------------------------
+	-- Operates the server
 function arcomlib.initServer( serverName, modemside )
 	arcomlib.instanceName = serverName
 	arcomlib.instanceModemSide = modemside
@@ -39,60 +35,6 @@ function arcomlib.initServer( serverName, modemside )
 
 	print( "Arcom Server: "..serverName.." Initialized, initially disabled.")
 end
-
-
-function arcomlib.regMainLoop( mainLoop )
-	-- argument validity check
-	if (type(mainLoop) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(mainLoop))
-	end
-
-	arcomlib.mainLoopFunction = function()
-		while true do
-			if __enabled == true then
-				mainLoop()
-				sleep(0.1)
-			else
-				sleep(1)
-			end
-		end
-	end
-end
-
-
-function arcomlib.regInitFunction( initFunc )
-	-- argument validity check
-	if (type(initFunc) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(initFunc))
-	end
-
-	arcomlib.initFunction = initFunc
-end
-
-
-function arcomlib.regSafetyWatchdog( sw )
-	-- argument validity check
-	if (type(sw) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(sw))
-	end
-
-	arcomlib.safetyWatchdogFunction = function()
-		while true do
-			sw()
-		end
-	end
-end
-
-
-function arcomlib.regInterrupt( ISR, boundedCmd )
-	-- argument validity check
-	if (type(ISR) ~= "function") then
-		error("Arcomlib: expected function, got ".. type(ISR))
-	end
-
-	arcomlib.interruptVectorTable[boundedCmd] = ISR
-end
-
 
 function arcomlib.startServer()
 	local ISRHost = function()
@@ -129,7 +71,59 @@ function arcomlib.startServer()
 	end
 end
 
+-----------------------------------------------------------
+	-- Register work logics on server
+function arcomlib.regMainLoop( mainLoop )
+	-- argument validity check
+	if (type(mainLoop) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(mainLoop))
+	end
 
+	arcomlib.mainLoopFunction = function()
+		while true do
+			if __enabled == true then
+				mainLoop()
+				sleep(0.1)
+			else
+				sleep(1)
+			end
+		end
+	end
+end
+
+function arcomlib.regInitFunction( initFunc )
+	-- argument validity check
+	if (type(initFunc) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(initFunc))
+	end
+
+	arcomlib.initFunction = initFunc
+end
+
+function arcomlib.regSafetyWatchdog( sw )
+	-- argument validity check
+	if (type(sw) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(sw))
+	end
+
+	arcomlib.safetyWatchdogFunction = function()
+		while true do
+			sw()
+		end
+	end
+end
+
+function arcomlib.regInterrupt( ISR, boundedCmd )
+	-- argument validity check
+	if (type(ISR) ~= "function") then
+		error("Arcomlib: expected function, got ".. type(ISR))
+	end
+
+	arcomlib.interruptVectorTable[boundedCmd] = ISR
+end
+
+------------------------------------------------------------
+	-- Used by ISRs
 function arcomlib.innerInterrupt( targetISR, args )
 	cmd = {}
 	cmd.targetISR = targetISR
@@ -138,6 +132,26 @@ function arcomlib.innerInterrupt( targetISR, args )
 	rednet.send(os.getComputerID(), cmd, ARCOM_CMD_PROTOCAL)
 end
 
+function arcomlib.sendFeedback( stat, msg )
+	local feedBack = {}
+	feedBack.stat = stat
+	feedBack.msg = msg
+	feedBack.sender = arcomlib.instanceName
+	clientID = rednet.lookup(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
+	rednet.send(clientID, feedBack, ARCOM_FEEDBACK_PROTOCAL)
+end
+
+
+-------------------------------------------
+-- Client side interface
+-------------------------------------------
+function arcomlib.initClient()
+	arcomlib.instanceType = "Client"
+	arcomlib.instanceName = ARCOM_CLIENT_NAME
+	rednet.open(CLIENT_MODEM_SIDE)
+	rednet.host(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
+	print( "Arcom Client: Initialized." )
+end
 
 function arcomlib.fireCmd( msg )
 	local spiltedMsg = {}
@@ -163,24 +177,15 @@ function arcomlib.fireCmd( msg )
 	rednet.send(destID, cmd, ARCOM_CMD_PROTOCAL)
 end
 
-
-function arcomlib.sendFeedback( stat, msg )
-	local feedBack = {}
-	feedBack.stat = stat
-	feedBack.msg = msg
-	feedBack.sender = arcomlib.instanceName
-	clientID = rednet.lookup(ARCOM_FEEDBACK_PROTOCAL, ARCOM_CLIENT_NAME)
-	rednet.send(clientID, feedBack, ARCOM_FEEDBACK_PROTOCAL)
-end
-
-
 function arcomlib.receiveFeedback()
 	local feedBack = {}
 	_, feedBack, _ = rednet.receive(ARCOM_FEEDBACK_PROTOCAL)
 	return feedBack
 end
 
-
+--------------------------------------------
+-- Both used
+--------------------------------------------
 function arcomlib.clearup()
 	if arcomlib.instanceType == nil then
 		return
@@ -192,6 +197,5 @@ function arcomlib.clearup()
 	arcomlib.instanceModemSide = nil
 	rednet.unhost(arcomlib.instanceName)
 end
-
-------------------------------------
+---------------------------------------
 return arcomlib
