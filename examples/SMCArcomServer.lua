@@ -8,7 +8,7 @@ local arcom = dofile("/lib/arcomlib.lua")
 local smeltery = dofile("/lib/smeltery.lua")
 
 print("Arcom Production Server for SMC")
-arcom.initServer("SMC", "top")
+arcom.initServer("SMC", "bottom")
 
 local function initialize ()
 	smeltery.caster.stop()
