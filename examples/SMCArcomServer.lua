@@ -69,7 +69,7 @@ local function cast (opt)
 		smeltery.caster.stop()
 		arcom.sendFeedback("OK", "Caster stoped.")
 	elseif opt == "stat" then
-		arcom.sendFeedback("INFO", "Caster status is "..smeltery.caster.getStatus())
+		arcom.sendFeedback("INFO", "Caster status is "..tostring(smeltery.caster.getStatus()))
 	else
 		arcom.sendFeedback("ERR", "Wrong opt, expected start, stop or stat.")
 	end
