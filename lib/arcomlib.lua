@@ -46,8 +46,8 @@ end
 function arcomlib.startServer()
 	local function ISRHost()
 		while true do
-			local cmd = {}
-			local senderID = -1
+			local cmd
+			local senderID
 			senderID, cmd, _ = rednet.receive(ARCOM_CMD_PROTOCAL)
 			local isNameValid = false
 			for isrName, isrFunc in pairs( arcomlib.interruptVectorTable ) do
@@ -139,7 +139,7 @@ function arcomlib.innerInterrupt( targetISR, args )
 		error("Arcom Server: innerInterrupt: Bad targetISR, function expected, got "..type(targetISR))
 	end
 
-	cmd = {}
+	local cmd = {}
 	cmd.targetISR = targetISR
 	if args == nil then args = {} end
 	cmd.args = args
@@ -148,6 +148,7 @@ end
 
 function arcomlib.sendFeedback( stat, msg )
 	local feedBack = {}
+	local clientID
 	feedBack.stat = stat
 	feedBack.msg = msg
 	feedBack.sender = arcomlib.instanceName
@@ -186,6 +187,7 @@ function arcomlib.fireCmd( msg )
 	cmd.targetISR = spiltedMsg[2]
 	cmd.args = table.pack( table.unpack( spiltedMsg, 3, #spiltedMsg ) )
 	-- Lookup server ID
+	local destID
 	destID = rednet.lookup(ARCOM_CMD_PROTOCAL, cmd.dest)
 	if destID == nil then
 		print( "[ERROR] Arcom DNS: no such server!" )
@@ -196,7 +198,7 @@ function arcomlib.fireCmd( msg )
 end
 
 function arcomlib.receiveFeedback()
-	local feedBack = {}
+	local feedBack
 	_, feedBack, _ = rednet.receive(ARCOM_FEEDBACK_PROTOCAL)
 	return feedBack
 end
