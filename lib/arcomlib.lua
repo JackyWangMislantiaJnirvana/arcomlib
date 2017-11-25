@@ -31,11 +31,11 @@ function arcomlib.initServer( serverName, modemside )
 	-- Defultly create ISR "enable" and "disable"
 	-- to start and stop the main loop
 	__mainLoopEnabled = false
-	arcomlib.interruptVectorTable["enable"] = function()
+	arcomlib.interruptVectorTable["__enableMainLoop"] = function()
 		__mainLoopEnabled = true
 		arcomlib.sendFeedback("OK", "Main loop enabled.")
 	end
-	arcomlib.interruptVectorTable["disable"] = function()
+	arcomlib.interruptVectorTable["__disableMainLoop"] = function()
 		arcomlib.sendFeedback("OK", "Main loop disabled.")
 		__mainLoopEnabled = false
 	end
