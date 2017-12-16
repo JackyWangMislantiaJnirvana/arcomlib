@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /arcomlib/description.html
+permalink: /description.html
 ---
 
 
@@ -55,7 +55,7 @@ Arcomlib提供了一个主循环＋中断服务程序(后文简称ISR)的开发�
 2. `mainLoopFunction`，当机子处于enable状态时不断被调用的函数
 3. `ISR`，中断服务程序，当收到来自其他设备的消息（后述）之后会被调用的**一组**程序。
 
-这样，你只需要完成这几个函数的bi'a
+这样，你只需要完成这几个函数的编写，其他的，交给Arcomlib即可
 
 ## 设备之间沟通方便途径
 
