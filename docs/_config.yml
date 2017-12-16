@@ -1,1 +1,4 @@
 theme: jekyll-theme-cayman
+title: Arcomlib for Computercraft
+description: Arcomlib致力于实现用少量代码实现物联网式的自动生产控制
+show_downloads: true
