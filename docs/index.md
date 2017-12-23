@@ -1,8 +1,8 @@
 # 欢迎来到Arcomlib项目的主页！(WIP)
 
-- [简介](/description.html) (待整理)
-- [文档](/docs.html) (还没写)
-- [草稿与Todo](/Todo.html) (最新规划与动态，证明我还没有死！...)
+- [简介](description.html) (待整理)
+- [文档](docs.html) (还没写)
+- [草稿与Todo](Todo.html) (最新规划与动态，证明我还没有死！...)
 
 
 *懒人指南：点击上方download zip按钮，把压缩包解压到计算机的目录即可。不过要开始搞事情之前，请先过目使用教程。（不然怎么用？）*
