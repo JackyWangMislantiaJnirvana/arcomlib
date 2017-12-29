@@ -69,3 +69,10 @@ end
 function arcomStd:callISR (ISRName, args)
   print("Todo!")
 end
+
+-- Node Operations
+  -- Main Entrance of StdNode program
+  -- Protected using pcall()
+function arcomStd:startNode ()
+  print("Todo!")
+end
