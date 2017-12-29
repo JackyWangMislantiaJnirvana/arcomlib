@@ -16,7 +16,7 @@ function ArcomNetLite.new (hostName, netModem)
   return object
 end
 
-function sendMsg (dest, targetISR, args)
+function ArcomNetLite:sendMsg (dest, targetISR, args)
   if type(dest) ~= "string"
       or type(targetISR) ~= "string"
       or type(args) ~= "table" then
@@ -25,21 +25,21 @@ function sendMsg (dest, targetISR, args)
   end
 end
 
-function sendFeedback (stat, msg)
+function ArcomNetLite:sendFeedback (stat, msg)
   if type(stat) ~= "string" or type(msg) ~= "string" then
     error("ArcomNetLite: sendFeedback(): bad args. Status string(OK, etc) and message required.")
   end
   -- Todo
 end
 
-function pullMsg (timeout)
+function ArcomNetLite:pullMsg (timeout)
   if type(timeout) ~= "number" then
     error("ArcomNetLite: pullMsg(): bad args. Timeout required.")
   end
   -- Todo
 end
 
-function pullFeedback (timeout)
+function ArcomNetLite:pullFeedback (timeout)
   if type(timeout) ~= "number" then
     error("ArcomNetLite: pullFeedback(): bad args. Timeout required.")
   end
