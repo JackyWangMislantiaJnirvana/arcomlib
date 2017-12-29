@@ -41,6 +41,13 @@ function arcomStd:regSafety(safeProtc)
   self.safetyProtocol = safeProtc
 end
 
+function arcomStd:regEmergency (eFunc)
+  if type(eFunc) ~= "function" then
+    error("ArcomStd: regEmergency(): bad args. Emergency function required.")
+  end
+  self.eFunction = eFunc
+end
+
 function arcomStd:regInt (ISR, name)
   if type(ISR) ~= "function" or type(name) ~= "string" then
     error("ArcomStd: regInt(): bad args. ISR function and its name required.")
