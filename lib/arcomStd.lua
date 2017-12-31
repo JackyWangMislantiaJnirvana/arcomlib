@@ -69,7 +69,7 @@ function arcomStd:regEmergency (eFunc)
   self.eFunction = eFunc
 end
 
-function arcomStd:regInt (ISR, name)
+function arcomStd:regISR (ISR, name)
   if type(ISR) ~= "function" or type(name) ~= "string" then
     error("ArcomStd: regInt(): bad args. ISR function and its name required.")
   end
