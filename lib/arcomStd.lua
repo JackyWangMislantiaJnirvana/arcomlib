@@ -24,14 +24,35 @@ function arcomStd:regLoop(loopFunc)
   if type(loopFunc) ~= "function" then
     error("ArcomStd: regLoop(): bad args. Loop function required.")
   end
-  self.loopFunction = loopFunc
+
+  --[[ wrap original loopFunc.
+  loopFunc is called periodically
+  when the node is enabled.
+  --]]
+  self.loopFunctionWrap = function ()
+    while self.status == "enabled" do
+      loopFunc()
+    end
+  end
 end
 
 function arcomStd:regInit(initFunc)
   if type(initFunc) ~= "function" then
     error("ArcomStd: regInit(): bad args. Init function required.")
   end
-  self.initFunction = initFunc
+
+  --[[ Wrap original initFunc
+  initFunc is called once when startup
+  if the Node ISN'T running.
+  (This mechanism aims to avoid duplicated
+  initialization when re-enter the world)
+  (Because CC's computer shutdown on exiting the world)
+  --]]
+  self.initFunction = function ()
+    if self.status ~= "enabled" then
+      initFunc()
+    end
+  end
 end
 
 function arcomStd:regSafety(safeProtc)
