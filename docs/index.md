@@ -1,5 +1,5 @@
 # 欢迎来到Arcomlib项目的主页！(WIP)
-
+![](https://forthebadge.com/images/featured/featured-built-with-love.svg)
 - [简介](description.html) (待整理)
 - [文档](docs.html) (还没写)
 - [草稿与Todo](Todo.html) (最新规划与动态，证明我还没有死！...)

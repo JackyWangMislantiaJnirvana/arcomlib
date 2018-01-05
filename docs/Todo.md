@@ -38,7 +38,7 @@ function arcomlib.clearup() end
 
 ---
 
-思想计划：
+备忘录：
 
 1. 结构变更：
 
@@ -70,6 +70,11 @@ function arcomlib.clearup() end
 
 4. 把用来解析命令字符串的代码从`fireCmd()`拆出，因为只有Client用得上它。
 5. std中的`ISRHost`剥离网络功能和搜索ISR的功能，改名`msgListener` ，其工作就是不断循环从net中`pullMsg()`并当有msg的时候调用`callISR()`，由这个行使查找和错误处理的功能。同时内中断不经过原`ISRHost`通道，直接调用`callISR()`
+6. `mainLoop`更名为`loopFunction`，与`initFunction`一致。取消"main"字样是为了体现出循环部分并不是必需的。
+7. 为适应新的status机制，`loopFunc`和`initFunc`均有wrap，前者在enabled时允许运行，后者在halt时允许运行，并且运行之后将模式调整为disabled
+8. `ArcomStd.startNode()`用`pcall`保护运行，当出现错误退出时自动执行`emergencyFunction`，销毁Node并退出。
+9. 安全部分包括`safetyProtocal`和`emergencyFunction`。前者负责监控，当除了问题之后设置failed并调用后者。后者负责紧急停车。
+10. 大新闻：之前对`rednet.dns`机制的依赖全是错误的。`rednet`只允许每个protocol注册一个hostname。是时候开发真正的`ArcomDNS`了...
 
 ---
 
@@ -82,42 +87,55 @@ function arcomlib.clearup() end
   - 数据成员：
 
     - 自身属性
-      - string：机器状态 `status` ("halt:主循环停，收场", "enabled：正常工作", "disabled：主循环停，不收场", "failed：故障状态，收场，")
-      - net句柄：网络接口 `netHandle`
+      - - [x] string：机器状态 `status` ("halt:主循环停，收场", "enabled：正常工作", "disabled：主循环停，不收场", "failed：故障状态，收场，")
+      - - [x] net句柄：网络接口 `netHandle`
+    - 持久化相关数据结构
+      - - [x] pickler句柄：持久化工具`tablePickler`
+      - - [x] table：持久化变量表
     - 函数容器
-      - table：中断向量表`interruptVectorTable`
-      - function：主循环 `mainLoop`
-      - function：初始化函数 `initFunction`
-      - function：安全协议 `safetyProtocol`
+      - - [x] table：中断向量表`interruptVectorTable`
+      - - [x] function：主循环 `mainLoop`
+      - - [x] function：初始化函数 `initFunction`
+      - - [x] function：安全协议 `safetyProtocol`
+      - - [x] function：急停函数`emergencyFunction`
     - 常驻线程：
-      - 包装后的主循环线程：`mainLoopWrapper`
-      - 安全线程：`safetyWatchdog`
-      - 信息接收线程：`msgListener`
+      - - [ ] 包装后的主循环线程：`loopFunctionWrapper`
+      - - [ ] 安全线程：`safetyWatchdog`
+      - - [ ] 信息接收线程：`msgListener`
 
   - 类的接口方法：
 
-    - 通用构造器：`new(arcomnet: netHandle)`
+    - - [ ] 通用构造器：`new(arcomnet: netHandle)`
 
   - 对象的接口方法：
 
     - 注册系列
 
-      - 注册主循环：`regMainLoop(function: mainLoop ) `
-      - 注册初始化函数：`regInitFunction(function: initFunc )`
-      - 注册安全协议：`regSafetyWatchdog(function: sw )`
-      - 注册ISR：`regInterrupt(function: ISR, string: boundedCmd ) `
+      - - [ ] 注册主循环：`regLoopFunction(function: loopFunc ) `
+      - - [ ] 注册初始化函数：`regInitFunction(function: initFunc )`
+      - - [ ] 注册安全协议：`regSafetyProtocal(function: sp )`
+      - - [ ] 注册ISR：`regInterruptFunction(function: ISR, string: boundedCmd ) `
+
+    - Node管理界面
+
+      - - [ ] 启动Node：`startNode()`
+      - - [ ] 清除Node：`destroyNode()`
 
     - ISR界面
 
-      - 改变状态：`changeStat(string: stat)`
+      - - [ ] 改变状态：`changeStat(string: stat)`
 
-      - 引发内中断：`innerInterrupt( targetISR, args )`
+      - - [ ] 引发内中断：`innerInterrupt( targetISR, args )`
 
         *见思想计划5*
 
+      - - [ ] 读持久化变量：`getPickleVal(string: name)`
+
+      - - [ ] 写持久化变量：`writePickleVal(string: name, anything: val)`
+
   - 对象的Private方法：
 
-    - ISR调用的通用接口`callISR()`
+    - - [ ] ISR调用的通用接口`callISR()`
 
       *包含查找和错误处理的逻辑*
 
@@ -128,24 +146,24 @@ function arcomlib.clearup() end
   - 数据成员：
 
     - 自身属性
-      - string：主机名`hostName`
-      - peripheral wrap：Modem句柄`netModem`
+      - - [ ] string：主机名`hostName`
+      - - [ ] peripheral wrap：Modem句柄`netModem`
 
   - 类的方法：
 
-    - 通用构造器：`new(string: hostname, modemWrap: netModem)`
+    - - [ ] 通用构造器：`new(string: hostname, modemWrap: netModem)`
 
   - 对象的方法：
 
-    - 发送信息：`sendMsg(string: dest, string: targetISR, table: args)`
+    - - [ ] 发送信息：`sendMsg(string: dest, string: targetISR, table: args)`
 
       *备注：见思想计划4*
 
-    - 发送反馈：`sendFeedback(string: stat, string: msg)`
+    - - [ ] 发送反馈：`sendFeedback(string: stat, string: msg)`
 
-    - 接受信息：`pullMsg(number: timeout)`
+    - - [ ] 接受信息：`pullMsg(number: timeout)`
 
-    - 接受反馈：`pullFeedback(number: timeout)`
+    - - [ ] 接受反馈：`pullFeedback(number: timeout)`
 
 - net对象（大的）（关系到干网的设计，先放着）：
 
