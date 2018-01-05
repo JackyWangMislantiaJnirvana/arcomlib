@@ -1,3 +1,9 @@
+-- Constant Values
+local STAT_HALT = "halt"
+local STAT_RUNNING = "enabled"
+local STAT_PAUSED = "disabled"
+local STAT_MALFUNC = "failed"
+
 local arcomStd = {}
 arcomStd.__index = arcomStd
 
