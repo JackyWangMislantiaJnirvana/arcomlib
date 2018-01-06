@@ -3,6 +3,7 @@ local STAT_HALT = "halt"
 local STAT_RUNNING = "enabled"
 local STAT_PAUSED = "disabled"
 local STAT_MALFUNC = "failed"
+local PICKLE_FILENAME = "/usr/arcomPickle"
 
 local arcomStd = {}
 arcomStd.__index = arcomStd
@@ -16,10 +17,12 @@ function arcomStd.new (h_net, h_pickler)
   setmetatable(object, arcomStd)
 
   -- Attributes of class ArcomStd
+  object.picklerHandle = h_pickler.new(PICKLE_FILENAME)
   object.netHandle = h_net
-  object.picklerHandle = h_pickler
-  object.status = ""
-  object.pickledVars = {}
+    -- Make sure Node's status is restored properly
+    -- right after a HARD exiting
+  object.pickledVars = object.picklerHandle:get()
+  object.status = object.pickledVars.status or STAT_HALT
   object.ISRTable = {}
 
   return object
