@@ -29,9 +29,14 @@ function pickler.new (targetFile)
     error("Pickler: new: bad target file.")
   end
 
+  -- COMPAT: fs API are called filesystem in OC
   local object = {}
   setmetatable(object, pickler)
   object.targetFile = targetFile
+
+  if fs.exists(targetFile) ~= true then
+    fs.open(targetFile, "w").close()
+  end
   object.file_r = fs.open(targetFile, "r")
 
   return object
