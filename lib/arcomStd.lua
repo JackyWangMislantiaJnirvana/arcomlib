@@ -91,7 +91,15 @@ end
 
 -- ISR interface methods
 function arcomStd:changeStat (stat)
-  print("Todo!")
+  if  stat ~= STAT_HALT or
+      stat ~= STAT_UNINIT or
+      stat ~= STAT_PAUSED or
+      stat ~= STAT_RUNNING or
+      stat ~= STAT_MALFUNC then
+    error("Arcomlib: changeStat(): Invalid status name.")
+  end
+  self.status = stat
+  self:writePickleVal("status", stat)
 end
 
 function arcomStd:innerInterrupt (targetISR, args)
