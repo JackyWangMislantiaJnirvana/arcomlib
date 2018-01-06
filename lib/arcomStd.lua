@@ -68,7 +68,10 @@ function arcomStd:regSafety(safeProtc)
   if type(safeProtc) ~= "function" then
     error("ArcomStd: regSafety(): bad args. Safety Protocol function required.")
   end
-  self.safetyProtocol = safeProtc
+  -- Wrap safety thread
+  self.safetyProtocol = function ()
+    safeProtc()
+  end
 end
 
 function arcomStd:regEmergency (eFunc)
