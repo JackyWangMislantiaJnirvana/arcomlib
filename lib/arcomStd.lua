@@ -1,4 +1,5 @@
 -- Constant Values
+local STAT_UNINIT = "uninited"
 local STAT_HALT = "halt"
 local STAT_RUNNING = "enabled"
 local STAT_PAUSED = "disabled"
@@ -22,7 +23,7 @@ function arcomStd.new (h_net, h_pickler)
     -- Make sure Node's status is restored properly
     -- right after a HARD exiting
   object.pickledVars = object.picklerHandle:get()
-  object.status = object.pickledVars.status or STAT_HALT
+  object.status = object.pickledVars.status or STAT_UNINIT
   object.ISRTable = {}
 
   return object
@@ -58,7 +59,7 @@ function arcomStd:regInit(initFunc)
   (Because CC's computer shutdown on exiting the world)
   --]]
   self.initFunction = function ()
-    if self.status ~= "enabled" then
+    if self.status ==  STAT_UNINIT then
       initFunc()
     end
   end
