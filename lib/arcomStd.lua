@@ -106,12 +106,15 @@ function arcomStd:innerInterrupt (targetISR, args)
   print("Todo!")
 end
 
+-- PickledVars is updated by unpickling only during startup
+-- and is pickled every time you change it.
 function arcomStd:getPickleVal (name)
-  print("Todo!")
+  return self.pickledVars[name]
 end
 
 function arcomStd:writePickleVal (name, val)
-  print("Todo!")
+  self.pickledVars[name] = val
+  self.picklerHandle:dump(self.pickledVars)
 end
 
 -- Private methods
