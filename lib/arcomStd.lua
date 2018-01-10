@@ -124,8 +124,23 @@ function arcomStd:writePickleVal (name, val)
 end
 
 -- Private methods
-function arcomStd:callISR (ISRName, args)
-  print("Todo!")
+function arcomStd:callISR (ISRName, ...)
+  if type(ISRName) ~= "string" then
+    error("ArcomStd.callISR: bad argument. string: ISRName expected.")
+  end
+
+  local isNameValid = false
+  for name, isr in pairs(self.ISRTable) do
+    if name == ISRName then
+      isNameValid = true
+			print( "Recieved an request to ISR "..name..".")
+      isr(...)
+    end
+  end
+  if isNameValid == false then
+    print("ArcomStd.callISR: ".."There's no ISR named \""..ISRName.."\".")
+    -- TODO Add Client feedback (ArcomNet)
+  end
 end
 
 -- Node Operations
