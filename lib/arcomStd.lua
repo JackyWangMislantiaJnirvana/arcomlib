@@ -77,12 +77,16 @@ function arcomStd:regSafety(safeProtc)
   end
 end
 
+-- E-function seems duplicated (with the ISR "estop")
+-- and useless, so it is removed. (KISS)
+--[[
 function arcomStd:regEmergency (eFunc)
   if type(eFunc) ~= "function" then
     error("ArcomStd: regEmergency(): bad args. Emergency function required.")
   end
   self.eFunction = eFunc
 end
+]]
 
 function arcomStd:regISR (ISR, name)
   if type(ISR) ~= "function" or type(name) ~= "string" then
