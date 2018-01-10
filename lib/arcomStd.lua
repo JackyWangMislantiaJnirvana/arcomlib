@@ -35,11 +35,11 @@ function arcomStd:regLoop(loopFunc)
     error("ArcomStd: regLoop(): bad args. Loop function required.")
   end
 
-  --[[ wrap original loopFunc.
+  --[[ wrap loopFunc into loop thread.
   loopFunc is called periodically
   when the node is enabled.
   --]]
-  self.loopFunctionWrap = function ()
+  self.loopThread = function ()
     while self.status == "enabled" do
       loopFunc()
     end
@@ -70,8 +70,10 @@ function arcomStd:regSafety(safeProtc)
     error("ArcomStd: regSafety(): bad args. Safety Protocol function required.")
   end
   -- Wrap safety thread
-  self.safetyProtocol = function ()
-    safeProtc()
+  self.safetyThread = function ()
+    while true do
+      safeProtc()
+    end
   end
 end
 
