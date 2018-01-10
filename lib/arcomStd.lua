@@ -108,8 +108,13 @@ function arcomStd:changeStat (stat)
   self:writePickleVal("status", stat)
 end
 
-function arcomStd:innerInterrupt (targetISR, args)
-  print("Todo!")
+function arcomStd:innerInterrupt (targetISR, ...)
+  if type(targetISR) ~= "string" then
+    error("ArcomStd.innerInterrupt: Bad argument. targetISR's name required.")
+  end
+
+  print("Tiggered inner interrupt \""..targetISR.."\".")
+  self.callISR(targetISR, ...)
 end
 
 -- PickledVars is updated by unpickling only during startup
