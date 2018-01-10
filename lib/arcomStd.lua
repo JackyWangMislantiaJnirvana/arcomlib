@@ -148,6 +148,18 @@ function arcomStd:callISR (ISRName, ...)
   end
 end
 
+function arcomStd:listenerThread ()
+  --[[ Question:
+    will the listener be blocked by ISR,
+    and loose the comming messages?
+    (should I build a message queue?)
+  ]]
+--  while true do
+--      self.netHandle:pullMsg()
+--  end
+end
+
+
 -- Node Operations
   -- Main Entrance of StdNode program
   -- Protected using pcall()
