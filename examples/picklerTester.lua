@@ -1,5 +1,5 @@
 local Pickler = dofile("/lib/pickler.lua")
-local p = Pickler.new("wow.conf")
+local p = Pickler.new("/examples/wow.conf")
 local t = {a="b", b="c", c="d"}
 print("p:dump()")
 p:dump(t)
