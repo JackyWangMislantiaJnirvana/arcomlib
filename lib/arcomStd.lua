@@ -160,9 +160,25 @@ function arcomStd:listenerThread ()
 end
 
 
--- Node Operations
-  -- Main Entrance of StdNode program
-  -- Protected using pcall()
+-- Main Entrance of StdNode program
 function arcomStd:startNode ()
-  print("Todo!")
+  if self.status == STAT_UNINIT then
+    self.initFunction()
+  end
+
+  local threads = {}
+  table.insert(threads,self.listenerThread)
+  if self.safetyThread ~= nil then
+    table.insert(threads, self.safetyThread)
+  end
+  if self.loopThread ~= nil then
+    table.insert(threads, self.loopThread)
+  end
+
+  if #threads < 1 then
+    print("Hey! Please register at leaset one of loopFunc/safethProtc.")
+  else
+    print("Starting Arcom node!")
+    parallel.waitForAll(table.unpack(threads))
+  end
 end
