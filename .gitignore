@@ -1,9 +1,9 @@
 CCEnv
 deploy.sh
 .atom-build.yml
-Testers/wow.conf
 .buildpath
 .project
 0.iml
 .idea
 .settings
+Testers/wow.conf
