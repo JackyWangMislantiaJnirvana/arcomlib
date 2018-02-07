@@ -1,4 +1,6 @@
--- PickleJar module for Arcomlib
+-- PickleJar.lua
+-- Provide non-violate storage of a non-nested table.
+-- Arcomlib rev3
 
 local PickleJar = {}
 
