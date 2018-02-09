@@ -9,7 +9,7 @@ PickleJar = _G.PickleJar or dofile("/lib/PickleJar.lua")
 
 Controller = {}
 Controller.__index = Controller
-Controller.stats = {
+Controller.enumStatus = {
     enabed = 1,     -- running normally
     disabled = 2,   -- paused
     halt = 3,       -- shutdown
@@ -21,8 +21,8 @@ function Controller.new(name)
     setmetatable(object, Controller)
 
     object.name = name
-    object.controllerStatus = PickleJar.new("Con_" .. object.name .. ".status")
-    object.controllerStatus.status = object.controllerStatus.status or Controller.stats.halt
+    object.status = PickleJar.new("Con_" .. object.name .. ".status")
+    object.status.runLevel = object.status.runLevel or Controller.enumStatus.halt
     return object
 end
 
@@ -31,12 +31,14 @@ function Controller:setLoop(loop)
         error("Controller.setLoop: function required.")
     end
     self.loopFunc = function()
-        while self.controllerStatus["status"] == Controller.stats.enabled do
+        while self.status.runLevel == Controller.enumStatus.enabled do
             loop()
         end
     end
 end
 
+-- safety feature is moved to Safety.lua
+--[[
 function Controller:setSafety(safety)
     if type(safety) ~= "function" then
         error("Controller.setSafety: function required.")
@@ -47,9 +49,17 @@ function Controller:setSafety(safety)
         end
     end
 end
+--]]
 
+-- Status setter
+function Controller:enable()    self.status.runLevel = Controller.enumStatus.enabled    end
+function Controller:disable()   self.status.runLevel = Controller.enumStatus.disabled   end
+function Controller:halt()      self.status.runLevel = Controller.enumStatus.halt       end
+function Controller:estop()     self.status.runLevel = Controller.enumStatus.failed     end
+-- Status getter
+function Controller:getStatus() return self.status.runLevel end
+
+-- Get runable controller
 function Controller:getRunable()
-    return function()
-        waitForAll(Controller.safetyFunc, Controller.loopFunc)
-    end
+    return Controller.loopFunc
 end
