@@ -7,7 +7,7 @@
 -- then load it by dofile.(How premitive...
 PickleJar = _G.PickleJar or dofile("/lib/PickleJar.lua")
 
-Controller = {}
+local Controller = {}
 Controller.__index = Controller
 Controller.enumStatus = {
     enabed = 1,     -- running normally
