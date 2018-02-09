@@ -5,7 +5,7 @@
 -- If PickleJar isn't automatically loaded into ENV
 -- (CC's style API handling)
 -- then load it by dofile.(How premitive...
-PickleJar = _G.PickleJar or dofile("/lib/PickleJar.lua")
+local PickleJar = _G.PickleJar or dofile("/lib/PickleJar.lua")
 
 local Controller = {}
 Controller.__index = Controller
