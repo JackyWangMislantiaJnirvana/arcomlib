@@ -16,6 +16,8 @@ Controller.enumStatus = {
     failed = 4      -- something goes wrong
 }
 
+-- Note:
+-- this name is used to name the config files.
 function Controller.new(name)
     local object = {}
     setmetatable(object, Controller)
@@ -61,5 +63,7 @@ function Controller:getStatus() return self.status.runLevel end
 
 -- Get runable controller
 function Controller:getRunable()
-    return Controller.loopFunc
+    return self.loopFunc
 end
+
+return Controller
