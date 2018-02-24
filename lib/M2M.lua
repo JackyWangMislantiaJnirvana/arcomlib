@@ -71,3 +71,5 @@ function M2M:getHandlerNotFoundHandler()
     end
     return handlerNotFoundHandler
 end
+
+return M2M
