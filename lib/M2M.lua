@@ -16,7 +16,7 @@ function M2M.new(hostName, modemSide)
     object.eventPump = EventPump.new()
 
     rednet.open(modemSide)
-    rednet.host(hostName)
+    rednet.host(ARCOM_MSG_PROTOCAL, hostName)
 
     return object
 end
@@ -37,7 +37,11 @@ function M2M:sendMsg(receiverHostname, ...)
         error("M2M:sendMsg():receiver hostname(string) required.")
     end
     local receiverID = rednet.lookup(ARCOM_MSG_PROTOCAL, receiverHostname)
-    rednet.send(receiverID, table.pack(...), ARCOM_MSG_PROTOCAL)
+    if receiverID == nil then
+        print("[ERR] M2M: Receiver not found.")
+    else
+        rednet.send(receiverID, table.pack(...), ARCOM_MSG_PROTOCAL)
+    end
     -- TODO Mega network support: cell fallback
 end
 
