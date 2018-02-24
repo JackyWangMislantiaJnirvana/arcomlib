@@ -34,7 +34,7 @@ end
 -- Do that works? To be tested in the future.
 --]]
 function EventPump:listen(eventTag, callback)
-    if type(eventTag) ~= "string" or type(handler) ~= "function" then
+    if type(eventTag) ~= "string" or type(callback) ~= "function" then
         error("EventPump: listen(): bad argument: name(string) and callback(function) requiered.")
     end
 
@@ -103,7 +103,7 @@ end
 function EventPump:handleEvent(targetTag, argTable)
     local handlerNotFound = false
     for _, v in pairs(self.handlerMap[targetTag]) do
-        v(table.unpack(argTable))
+        v.callback(table.unpack(argTable))
         handlerNotFound = true
     end
 
@@ -124,7 +124,7 @@ function EventPump:getRunable()
         while true do
             local name, targetTag, argTable
             name, targetTag, argTable = os.pullEvent(self.ARCOM_EVENT_NAME)
-            self:handleEvnet(targetTag, argTable)
+            self:handleEvent(targetTag, argTable)
         end
     end
     return runable
