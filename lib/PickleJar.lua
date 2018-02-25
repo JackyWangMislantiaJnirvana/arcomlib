@@ -1,19 +1,24 @@
 -- PickleJar.lua
 -- Provide non-violate storage of a non-nested table.
 -- Arcomlib rev3
+_DEBUG = false
 
 local PickleJar = {}
 
 -- Support handy usage: (if a PickleJar object is called "pk")
 -- pk[Name] = valueWantedToBePickled
 function PickleJar.__index (obj, key)
-  --print("Calling PickleJar.__index, key = "..key)
+  if _DEBUG then print("[DEBUG]Calling PickleJar.__index, key = "..key) end
+
   return getmetatable(obj)[key] or obj.valueTable[key]
 end
 
 function PickleJar.__newindex (obj, key, val)
-  --print("Calling PickleJar.__newindex, key = "..key)
-  --print("val = "..val)
+  if _DEBUG then
+      print("[DEBUG]Calling PickleJar.__newindex, key = "..key)
+      print("[DEBUG]val = "..val)
+  end
+
   obj.valueTable[key] = val
   obj:flush()
 end
@@ -53,7 +58,9 @@ function PickleJar:flush ()
   for k,v in pairs(self.valueTable) do
     resultString = resultString..k.."="..v.."\n"
   end
-  --print("in flush "..resultString)
+
+  if _DEBUG then print("[DEBUG]in flush "..resultString) end
+
   file_w.write(resultString)
   file_w.close()
 end
@@ -61,9 +68,13 @@ end
 function PickleJar:load ()
   local file_r = fs.open(self.targetFile, "r")
   local rawString = file_r.readAll()
-  --print("loaded string: "..rawString)
-  for k, v in string.gmatch(rawString, "(%w+)=(%w+)") do
-    --print("Loaded: k = "..k.." v = "..v)
+
+  if _DEBUG then print("[DEBUG]loaded string: "..rawString) end
+
+  for k, v in string.gmatch(rawString, "(%w+) *= *(%w+)") do
+
+    if _DEBUG then print("[DEBUG]loaded: k = "..k.." v = "..v) end
+
     self.valueTable[k] = v
   end
   file_r.close()

@@ -1,6 +1,7 @@
 -- Controller.lua
 -- Provide a auto controller structure
 -- Arcomlib rev3
+_DEBUG = false
 
 -- If PickleJar isn't automatically loaded into ENV
 -- (CC's style API handling)
