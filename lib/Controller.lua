@@ -5,15 +5,16 @@
 -- If PickleJar isn't automatically loaded into ENV
 -- (CC's style API handling)
 -- then load it by dofile.(How premitive...
+
 local PickleJar = _G.PickleJar or dofile("/lib/PickleJar.lua")
 
 local Controller = {}
 Controller.__index = Controller
 Controller.enumStatus = {
-    enabed = 1,     -- running normally
-    disabled = 2,   -- paused
-    halt = 3,       -- shutdown
-    failed = 4      -- something goes wrong
+    enabled  = "enabled",   -- running normally
+    disabled = "disabled",  -- paused
+    halt     = "halt",      -- shutdown
+    failed   = "failed"     -- something goes wrong
 }
 
 -- Note:
@@ -33,8 +34,21 @@ function Controller:setLoop(loop)
         error("Controller.setLoop: function required.")
     end
     self.loopFunc = function()
-        while self.status.runLevel == Controller.enumStatus.enabled do
-            loop()
+        while true do
+
+            if _DEBUG then
+                print("[DEBUG]", type(self.status.runLevel))
+                print("[DEBUG]", type(Controller.enumStatus.enabled))
+            end
+
+            if self.status.runLevel == Controller.enumStatus.enabled then
+                if _DEBUG then
+                    print("[DEBUG]", "calling loopfunc")
+                end
+
+                loop()
+            end
+            sleep(0.001)
         end
     end
 end
