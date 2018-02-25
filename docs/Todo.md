@@ -25,11 +25,27 @@ By Wilgengebroed on Flickr - Cropped and sign removed from Internet of things si
 
 ### Arcomlib有什么？
 
-注：所有模块都有个`getRunable`方法，这个方法返回适用于递给parallel执行的函数。返回的那个方法直接用闭包访问self
+注：所有模块都有个`getRunable`方法，这个方法返回适用于递给parallel执行的函数。返回的那个方法直接用闭包访问self。事件源都在这里。
+
+需要监听事件的模块都有个`getHandler`方法，这个方法返回给`EventPump`的事件处理器函数。
+
+接口模块
+
+0. **[搞定!]** 事件泵模块`EventPump`
+
+    从event queue中pull出Arcomlib专属的event，分发到相应的Handler
+
+    处于中心位置。其他模块可以通过`getHandler`获取自己的Handler让自己能监听事件
+
+    ```
+    void addHandler(string: name, function: handler)
+    void pushEvent(string: name, args...)
+    function getRunable()
+    ```
 
 1. 通讯模块`M2M`
 
-   保证消息能正确地到达目标主机名，并把收到的消息推入OS的event queue
+   保证消息能正确地到达目标主机名，并把收到的消息用`EventPump.pushEvent`推入OS的event queue
 
    内中断收到这里来了，取消特殊性。local host是有优化的，放心用
 
@@ -38,27 +54,39 @@ By Wilgengebroed on Flickr - Cropped and sign removed from Internet of things si
    void sendFeedback(string: stat, string: description)
    threadFunction getRunable()
    ```
+   M2M可能要使用自组织网络和动态路由。
 
-2. 事件泵模块`EventPump`
+   不过初版本只弄最简单的小范围直连
 
-   从event queue中pull出Arcomlib专属的event，分发到相应的Handler
+   需要解决的技术栈：
 
-   ```
-   void addHandler(string: name, function: handler)
-   function getRunable()
-   ```
+   - 机器之间同步数据？（用来同步网络结构图的知识）
+   - 给定图，寻找最短路问题（而且这个图超级大，只能动规，遍历是会死的）
+   - 图的增量更新问题
 
-3. 控制器模块`Controller`
+   现在在纠结是用纯节点网络还是要有特殊的网络节点。
 
-   提供循环体和安全体
+   （还是用特殊网络节点/干网方案吧...这个对等网络根本矼不住...）
+
+2. **[搞定!]** 控制器模块`Controller`
+
+   提供循环体和自身状态的记忆。包含了一个`PickleJar`
 
    ```
    void setLoop(function: loopFunction)
-   void setSafety(function: safetyFunction)
    function getRunable()
    ```
 
-4. **[搞定!]** 持久化模块`Pickler`
+3. **[搞定!] ** 安全模块`Safety`
+
+   ```
+   void setEStoper(function: safetyFunction)
+   void setWatchdog(function: estoperFunction)
+   function getRunable()
+   handler getHandler()
+   ```
+
+4. **[搞定!]** 持久化模块`PickleJar`
 
    将数据存储/提取，应付关机掉电的数据丢失
 
