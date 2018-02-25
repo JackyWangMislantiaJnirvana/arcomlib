@@ -8,3 +8,4 @@ deploy.sh
 .settings
 Testers/wow.conf
 .metadata/
+/Con_test.status
