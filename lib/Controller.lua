@@ -21,6 +21,7 @@ Controller.enumStatus = {
 -- Note:
 -- this name is used to name the config files.
 function Controller.new(name)
+    if type(name) ~= "string" then error("Controller.new: name(string) required") end
     local object = {}
     setmetatable(object, Controller)
 
