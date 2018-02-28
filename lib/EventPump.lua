@@ -102,6 +102,9 @@ end
  ]]
 function EventPump:handleEvent(targetTag, argTable)
     local handlerNotFound = false
+    if self.handlerMap[targetTag] == nil then
+        handlerNotFound = true
+    end
     for _, v in pairs(self.handlerMap[targetTag]) do
         v.callback(table.unpack(argTable))
         handlerNotFound = true
