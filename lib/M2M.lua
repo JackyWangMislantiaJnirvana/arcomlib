@@ -2,6 +2,8 @@
 -- Machine to Machine communications
 -- Arcomlib rev3
 
+__DEBUG = false
+
 local ARCOM_MSG_PROTOCAL = "Arcom_MSG"
 local ARCOM_FB_PROTOCAL = "Arcom_FB"
 
@@ -45,15 +47,19 @@ function M2M:sendMsg(receiverHostname, ...)
     -- TODO Mega network support: cell fallback
 end
 
+-- Feedback pack is consist of
+-- sender hostname, status(string) and description(string)
 function M2M:sendFeedBack(status, description)
     if type(status) ~= "string" or type(description) ~= "string" then
-        error("M2M:sendMsg():status(string) and description(stirng) required.")
+        error("M2M:sendFeedBack():status(string) and description(stirng) required.", 2)
     end
-    rednet.broadcast(table.pack(status, description), ARCOM_MSG_PROTOCAL)
+    rednet.broadcast(table.pack(self.hostName, status, description), ARCOM_FB_PROTOCAL)
 end
 
 function M2M:pullFeedBack()
-    return table.unpack(rednet.receive(ARCOM_FB_PROTOCAL))
+    local senderID, fbTab
+    senderID, fbTab = rednet.receive(ARCOM_FB_PROTOCAL)
+    return table.unpack(fbTab)
 end
 
 function M2M:getRunable()
@@ -71,7 +77,11 @@ end
 
 function M2M:getHandlerNotFoundHandler()
     local function handlerNotFoundHandler(targetTag)
-        self.sendFeedBack("ERR", targetTag .. "doesn't exist.")
+        if __DEBUG then
+            print("[DEBUG] ", targetTag)
+            print("[DEBUG] ", type(targetTag.." dosen't exist."))
+        end
+        self:sendFeedBack("ERR", targetTag .. " doesn't exist.")
     end
     return handlerNotFoundHandler
 end
