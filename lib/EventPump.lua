@@ -7,12 +7,14 @@
 -- Arcomlib rev3
 --]]
 
+__DEBUG = false
+
 local EventPump = {}
 EventPump.__index = EventPump
 
 -- Constants
 EventPump.ARCOM_EVENT_NAME = "arcom_event"
-EventPump.HANDLER_NOT_FOUND_HANDLER_TAG = "HandlerNotFoundHandler"
+EventPump.HANDLER_NOT_FOUND_HANDLER_TAG = "handlerNotFoundHandler"
 
 function EventPump.new()
     local object = {}
@@ -35,7 +37,7 @@ end
 --]]
 function EventPump:listen(eventTag, callback)
     if type(eventTag) ~= "string" or type(callback) ~= "function" then
-        error("EventPump: listen(): bad argument: name(string) and callback(function) requiered.")
+        error("EventPump: listen(): bad argument: name(string) and callback(function) requiered.", 2)
     end
 
     -- If this eventTag isn't registered before, create it.
@@ -100,22 +102,28 @@ end
 -- When being fed by non-exist targetTag,
 -- this function will call this handler, **if it exists**.
  ]]
-function EventPump:handleEvent(targetTag, argTable)
-    local handlerNotFound = false
-    if self.handlerMap[targetTag] == nil then
-        handlerNotFound = true
-    end
-    for _, v in pairs(self.handlerMap[targetTag]) do
-        v.callback(table.unpack(argTable))
-        handlerNotFound = true
+function EventPump:handleEvent(targetTag, ...)
+    local argTable = table.pack(...)
+    local handlerNotFound = true
+    if self.handlerMap[targetTag] ~= nil then
+        for _, v in pairs(self.handlerMap[targetTag]) do
+            v.callback(table.unpack(argTable))
+            handlerNotFound = false
+        end
     end
 
     -- Call handlerNotFoundHandler(what a strange name!)
     -- when provided targetTag doesn't exist.
     if handlerNotFound then
+        print("[ERR] EventPump: handler not found")
         -- Call handlerNotFoundHandler if possible
-        if self.handlerMap[self.HANDLER_NOT_FOUND_HANDLER_NAME] ~= nil then
-            self.handlerMap[self.HANDLER_NOT_FOUND_HANDER_NAME](targetTag)
+        local handlerNotFoundHandler = self.HANDLER_NOT_FOUND_HANDLER_TAG
+        if handlerNotFoundHandler ~= nil then
+            self.handlerMap[self.HANDLER_NOT_FOUND_HANDLER_TAG]
+                [1].callback(targetTag)
+        else
+            print("[WARNING] EventPump: Missing handler not found handler")
+            print("[WARNING] EventPump: Please get it calling m2m:getHandlerNotFoundHander()")
         end
     end
 end
@@ -127,7 +135,7 @@ function EventPump:getRunable()
         while true do
             local name, targetTag, argTable
             name, targetTag, argTable = os.pullEvent(self.ARCOM_EVENT_NAME)
-            self:handleEvent(targetTag, argTable)
+            self:handleEvent(targetTag, table.unpack(argTable))
         end
     end
     return runable
