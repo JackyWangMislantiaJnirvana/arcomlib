@@ -5,6 +5,7 @@
 
 Safety = {}
 Safety.__index = Safety
+WATCHDOG_LOOP_DELAY = 0.1
 
 function Safety.new()
     local object = {}
@@ -21,6 +22,7 @@ function Safety:setWatchdog(watchdog)
     local function wrappedWatchdog()
         while true do
             watchdog()
+            sleep(WATCHDOG_LOOP_DELAY)
         end
     end
     self.wrappedWatchdog = wrappedWatchdog
