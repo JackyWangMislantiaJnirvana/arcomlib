@@ -26,7 +26,7 @@ function Controller.new(name)
     setmetatable(object, Controller)
 
     object.name = name
-    object.status = PickleJar.new("Con_" .. object.name .. ".status")
+    object.status = PickleJar.new("Controller.status")
     object.status.runLevel = object.status.runLevel or Controller.enumStatus.halt
     return object
 end
